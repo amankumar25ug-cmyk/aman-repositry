@@ -9,7 +9,7 @@ typedef struct Taxon {
 } Taxon;
 
 
-// Function to create a taxon
+// Create a taxon
 Taxon* create_taxon(const char *name, int lifespan)
 {
     Taxon *new_taxon = malloc(sizeof(Taxon));
@@ -28,7 +28,7 @@ Taxon* create_taxon(const char *name, int lifespan)
 }
 
 
-// Function to read taxon information
+// Read taxon information
 void read_taxon_info(const char *label, char *name_out, int *lifespan_out)
 {
     printf("Enter name for %s: ", label);
@@ -36,6 +36,38 @@ void read_taxon_info(const char *label, char *name_out, int *lifespan_out)
 
     printf("Enter average lifespan for %s: ", label);
     scanf("%d", lifespan_out);
+}
+
+
+// Connect child with parent
+void link_parent(Taxon *child, Taxon *parent)
+{
+    child->parent_group = parent;
+}
+
+
+// Print classification hierarchy
+void print_taxonomy(Taxon *species_list[], int species_count)
+{
+    printf("\n=== SPECIES CLASSIFICATION HIERARCHY ===\n");
+
+    for (int i = 0; i < species_count; i++)
+    {
+        Taxon *species = species_list[i];
+        Taxon *genus = species->parent_group;
+        Taxon *family = genus->parent_group;
+
+        printf("\n%d. SPECIES %d: %s\n", i + 1, i + 1, species->name);
+
+        printf("   - Average Lifespan: %d years\n",
+               species->lifespan);
+
+        printf("   - Belongs to Genus: %s (Lifespan: %d yrs)\n",
+               genus->name, genus->lifespan);
+
+        printf("   - Belongs to Family: %s (Lifespan: %d yrs)\n",
+               family->name, family->lifespan);
+    }
 }
 
 
@@ -65,16 +97,31 @@ int main()
         taxa[i] = create_taxon(name, lifespan);
     }
 
-    // Display all created nodes
-    printf("\n===== TAXONOMY TREE NODES =====\n");
 
-    for (int i = 0; i < 7; i++)
-    {
-        printf("\nName: %s", taxa[i]->name);
-        printf("\nAverage Lifespan: %d years\n", taxa[i]->lifespan);
-    }
+    // Connect genera to family
+    link_parent(taxa[1], taxa[0]);
+    link_parent(taxa[2], taxa[0]);
 
-    printf("\nAll 7 Taxon nodes created successfully!\n");
+    // Connect species to genera
+    link_parent(taxa[3], taxa[1]);
+    link_parent(taxa[4], taxa[1]);
+
+    link_parent(taxa[5], taxa[2]);
+    link_parent(taxa[6], taxa[2]);
+
+
+    // Create species list
+    Taxon *species_list[4] = {
+        taxa[3],
+        taxa[4],
+        taxa[5],
+        taxa[6]
+    };
+
+
+    // Print classification
+    print_taxonomy(species_list, 4);
+
 
     // Free allocated memory
     for (int i = 0; i < 7; i++)
